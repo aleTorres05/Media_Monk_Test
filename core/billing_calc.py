@@ -1,40 +1,37 @@
-import csv
+import pandas as pd
 from csv_reader import read_csv_files
 
+#This funtion returs a CSV File with the proper calculations for each customer's project 
 def calculate_billing():
 
     clients, rates, platform_cost = read_csv_files('..\client_files')
-    client_billing_info=[]
-        
+    client_total_cost_dict={'Client ID':[], 'Client Name':[], 'Bill Currency':[],'Total Cost':[]}
+
+    #Iterates all clients and their Index from the Clients DataFrame   
     for _, client in clients.iterrows():
         
-        client_currency = client['Bill Currency']
-        client_project = platform_cost[['Advertising Cost', 'Currency']].where(platform_cost['Client ID'] == client['Client ID']).dropna()
-        
+        client_project = platform_cost[['Client ID', 'Advertising Cost', 'Currency']].where(platform_cost['Client ID'] == client['Client ID']).dropna()
+
+        #Iterates all projects and their Index from the Client Projects DataFrame 
         for _, project in client_project.iterrows():
-            #aqui se busca la divisa basada en la del cliente
-            rate_value = rates.loc[rates['Origin Currency'] == project['Currency']][client_currency]
-            #se multiplica costo de projecto por valor de la divisa
-            cost_project = project['Advertising Cost'] * rate_value
-            #se saca el costo por el servicio del proyecto 
+            #Creates a DataFrame with the convertion of currency from Project Currency and client Bill Currency 
+            client_currency = rates.loc[rates['Origin Currency'] == project['Currency']][client['Bill Currency']]
+            #Multiply the cost of the project by the convertion rate to get the Currency conversion 
+            cost_project = project['Advertising Cost'] * client_currency
+            #Calculate the cost of the Service Rate for each project  
             service_rate_cost = cost_project * client['Service Rate']
-            #Costo total del proyecto
+            #Total project cost
             total_cost = cost_project + service_rate_cost
+            
+            client_total_cost_dict['Client ID'].append(project['Client ID'])
+            client_total_cost_dict['Client Name'].append(client['Client Name'])
+            client_total_cost_dict['Bill Currency'].append(client['Bill Currency'])
+            client_total_cost_dict['Total Cost'].append(total_cost.iloc[0])
 
-            for _, value in total_cost.items():
-                client_billing_info.append([client['Client ID'], client['Client Name'], client['Bill Currency'], value])
+    #Creates a DataFrame and provide the total cost for all the project per client 
+    client_total_cost = pd.DataFrame.from_dict(client_total_cost_dict).groupby(['Client ID', 'Client Name', 'Bill Currency'])['Total Cost'].sum()
 
-                
-    return client_billing_info
-
-def create_csv():
-
-    client_billing_info = calculate_billing()
-    header = ['Client ID', 'Client Name', 'Bill Currency', 'Total']
-    with open('Clients_total_bill.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(header) 
-        writer.writerows(client_billing_info)             
+    client_total_cost.to_csv('..\client_files\Clients_total_bill.csv') 
 
 
-print(create_csv())
+calculate_billing()
