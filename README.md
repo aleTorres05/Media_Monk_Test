@@ -1,7 +1,7 @@
 # Meida Monk Billing Calcuation
 
 This project creates a single CSV file that calculatates the final cost of all the client's projects charged in their Billing Currency.
-in this project Pandas Libary is used to work and manage the Data from the CSV files provided. The objectiveof this project is to know which Currency each project is charged in and make the convertion from that currency to the equal value of the Client's Billing Currency. 
+in this project Pandas Libary is used to work and manage the Data from the CSV files provided. The objective of this project is to know which Currency each project is charged in and make the convertion from that currency to the equal value of the Client's Billing Currency. 
 
 
 # Requirements
