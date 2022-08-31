@@ -1,10 +1,10 @@
 import pandas as pd
-from csv_reader import read_csv_files
+from .csv_reader import read_csv_files
 
 #This funtion returs a CSV File with the proper calculations for each customer's project 
-def calculate_billing():
+def calculate_billing(folder_path):
 
-    clients, rates, platform_cost = read_csv_files('..\client_files')
+    clients, rates, platform_cost = read_csv_files(folder_path)
     client_total_cost_dict={'Client ID':[], 'Client Name':[], 'Bill Currency':[],'Total Cost':[]}
 
     #Iterates all clients and their Index from the Clients DataFrame   
@@ -31,7 +31,7 @@ def calculate_billing():
     #Creates a DataFrame and provide the total cost for all the project per client 
     client_total_cost = pd.DataFrame.from_dict(client_total_cost_dict).groupby(['Client ID', 'Client Name', 'Bill Currency'])['Total Cost'].sum()
 
-    client_total_cost.to_csv('..\client_files\Clients_total_bill.csv') 
+    client_total_cost.to_csv('.\client_files\Clients_total_bill.csv') 
 
+    return client_total_cost
 
-calculate_billing()
